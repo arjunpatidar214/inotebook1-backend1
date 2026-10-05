@@ -12,15 +12,15 @@ router.post('/createuser', [
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
-  }
+  }  
   try {
     let existing = await User.findOne({ email: req.body.email });
     if (existing) {
       return res.status(400).json({ error: "User with this email already exists" });
     }
     const user = await User.create(req.body);
-    res.json(user);
-  } catch (err) {
+    res.json(user); 
+  } catch (err) { 
     console.error(err.message);
     res.status(500).send("Some error occurred");
   }

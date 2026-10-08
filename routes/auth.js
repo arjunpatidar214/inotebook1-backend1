@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+
+const JWT_SECRET = 'arjun_2748462patidar'; // my secret key for JWT token generation
 
 // create user using: POST "/api/auth/createuser". No login required  
 router.post('/createuser', [
@@ -19,8 +23,12 @@ router.post('/createuser', [
     if (existing) {
       return res.status(400).json({ error: "User with this email already exists" });
     }
-    const user = await User.create(req.body);
-    res.json(user);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const user = await User.create({ ...req.body, password: hashedPassword });
+    const token = jwt.sign({ id: user._id }, JWT_SECRET);
+    
+    res.json({ token });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Some error occurred");
